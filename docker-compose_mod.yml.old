@@ -1,0 +1,49 @@
+version: '2'
+
+services:
+  sql-data:
+    image: microsoft/mssql-server-linux:2017-latest
+    hostname: egdn-mssql
+    networks:
+      egdn:
+        aliases:
+          - egdn-mssql
+    environment:
+            - ACCEPT_EULA=Y
+            - SA_PASSWORD=P@ssword2
+
+  identity-api:
+    image: ramysihacofo/identity-api
+    hostname: egdn-identity
+    depends_on:
+      - sql-data
+    networks:
+      egdn:
+        aliases:
+          - egdn-identity
+
+  policy-api:
+    image: ramysihacofo/policy-api
+    hostname: egdn-policy
+    depends_on:
+      - sql-data
+    networks:
+      egdn:
+        aliases:
+          - egdn-policy
+  apigw:
+    image: ramysihacofo/apigw
+    ports:
+            - "80:80"
+    hostname: egdn-gw
+    depends_on:
+      - sql-data
+      - identity-api
+      - policy-api
+    networks:
+      egdn:
+        aliases:
+          - egdn-gw
+networks:
+  egdn:
+    driver: bridge

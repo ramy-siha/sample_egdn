@@ -1,0 +1,60 @@
+version: '2.2'
+
+services:
+  sql.data:
+    image: microsoft/mssql-server-linux:2017-latest
+    hostname: egdn-mssql
+    networks:
+      egdn:
+        aliases:
+          - egdn-mssql
+    environment:
+            - ACCEPT_EULA=Y
+            - SA_PASSWORD=P@ssword2
+
+  identity.api:
+    image: egdn/identity.api:${TAG:-latest}
+    hostname: egdn-identity
+    networks:
+      egdn:
+        aliases:
+          - egdn-identity
+    build:
+      context: src/Services/Identity/
+      dockerfile: Dockerfile 
+    depends_on:
+      - sql.data
+
+  policy.api:
+    image: egdn/policy.api:${TAG:-latest}
+    hostname: egdn-policy
+    networks:
+      egdn:
+        aliases:
+          - egdn-policy
+    build:
+      context: src/
+      dockerfile: Dockerfile
+    depends_on:
+      - sql.data
+
+  apigw:
+    image: egdn/apigw:${TAG:-latest}
+    ports:
+            - "8080:80"
+    hostname: egdn-gw
+    networks:
+      egdn:
+        aliases:
+          - egdn-gw
+    build:
+      context: src/Gateway/Gateway.WebApi/
+      dockerfile: Dockerfile
+    depends_on:
+      - sql.data
+      - identity.api
+      - policy.api
+
+networks:
+  egdn:
+    driver: bridge        

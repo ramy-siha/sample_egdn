@@ -1,0 +1,68 @@
+﻿{
+  "ReRoutes": [
+    {
+      "DownstreamPathTemplate": "/api/policy/vehicle",
+      "DownstreamScheme": "http",
+      "DownstreamHttpMethod": [ "Post" ],
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "egdn-policy",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/v1/egdn/policy-vehicle",
+      "UpstreamHttpMethod": [ "Post" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/policy/policy",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "egdn-policy",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/v1/egdn/policy",
+      "UpstreamHttpMethod": [ "Post" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/policy/services",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "egdn-policy",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/v1/egdn/policy-services",
+      "UpstreamHttpMethod": [ "Get" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/user/authenticate",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "identity-api",
+          "Port": 9090
+        }
+      ],
+      "UpstreamPathTemplate": "/user/authenticate",
+      "UpstreamHttpMethod": [ "Post" ]
+    }
+  ],
+  "GlobalConfiguration": {
+    "UseServiceDiscovery": false
+  }
+}

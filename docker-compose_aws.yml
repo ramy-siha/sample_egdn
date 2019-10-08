@@ -1,0 +1,91 @@
+version: '3'
+
+services:
+  sql-data:
+    image: microsoft/mssql-server-linux:2017-latest
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: ecs-fargate-egdn
+        awslogs-region: eu-west-2
+        awslogs-stream-prefix: mssql
+    networks:
+      egdn:
+        aliases:
+          - egdn-mssql
+    environment:
+            - ACCEPT_EULA=Y
+            - SA_PASSWORD=P@ssword2
+
+  identity-api:
+    image: 195958316456.dkr.ecr.eu-west-2.amazonaws.com/identity-api:latest
+    ports:
+            - "9090:9090"
+    build:
+      context: src/Services/Identity/
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_URLS=http://+:9090
+      - ASPNETCORE_ENVIRONMENT=aws
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: ecs-fargate-egdn
+        awslogs-region: eu-west-2
+        awslogs-stream-prefix: identity
+    depends_on:
+      - sql-data
+    networks:
+      egdn:
+        aliases:
+          - egdn-identity
+
+  policy-api:
+    image: 195958316456.dkr.ecr.eu-west-2.amazonaws.com/policy-api:latest
+    ports:
+            - "8080:8080"
+    build:
+      context: src/
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_ENVIRONMENT=aws
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: ecs-fargate-egdn
+        awslogs-region: eu-west-2
+        awslogs-stream-prefix: policy
+    depends_on:
+      - sql-data
+    networks:
+      egdn:
+        aliases:
+          - egdn-policy
+  apigw:
+    image: 195958316456.dkr.ecr.eu-west-2.amazonaws.com/apigw:latest
+    ports:
+            - "80:80"
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_ENVIRONMENT=aws
+    build:
+      context: src/Gateway/Gateway.WebApi/
+      dockerfile: Dockerfile
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: ecs-fargate-egdn
+        awslogs-region: eu-west-2
+        awslogs-stream-prefix: gw
+    depends_on:
+      - sql-data
+      - identity-api
+      - policy-api
+    networks:
+      egdn:
+        aliases:
+          - egdn-gw
+networks:
+  egdn:
+    driver: bridge
