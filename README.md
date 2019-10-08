@@ -71,22 +71,29 @@ The file "ecr-role.json" contains specific configurations that would allow the c
 The following commands will be helpful assuming you have aws cli and ecs cli installed:
 
 * Create a custer with the name "egdnsample"
+
 ecs-cli configure --cluster egdnsample --default-launch-type FARGATE --region eu-west-2
 
 * ecs-cli up --capability-iam
+
 Bring the default cluster up
 
 * aws ecr get-login --region eu-west-2 --no-include-email
+
 Generate a temporary token to be used with the "docker login" command so that you can push the docker images to ECR
 
 * docker-compose -f docker-compose_aws.yml push
+
 Push the docker images to ECR
 
 * Create & Assing roles
+
 aws iam --region eu-west-2 create-role --role-name ecsTaskExecutionRole --assume-role-policy-document file:///opt/sample_egdn/execution-assume-role.json
+
 aws iam --region eu-west-2 attach-role-policy --role-name ecsTaskExecutionRole --policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
 
 * Deploy the service to ECS
+
 ecs-cli compose --file docker-compose_aws.yml --project-name egdn service up --enable-service-discovery --private-dns-namespace egdn --vpc vpc-0a26b947f019611b9
 
 You'll notice that we are specifically mentioning the "docker-compose_aws.yml" file, while the "ecs-params.yml" file is not mentioned since it is being picked up by default.
